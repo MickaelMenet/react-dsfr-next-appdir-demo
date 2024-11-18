@@ -1,0 +1,200 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Dynamic API Documentation",
+    "version": "1.0.0",
+    "description": "API documentation for dynamically generated endpoints based on database schema and relations."
+  },
+  "paths": {
+    "/api/tables": {
+      "get": {
+        "summary": "List all tables in the database",
+        "responses": {
+          "200": {
+            "description": "A list of tables",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "table_name": { "type": "string" },
+                      "table_schema": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/tables/{tableName}/columns": {
+      "get": {
+        "summary": "Get columns and metadata for a table",
+        "parameters": [
+          {
+            "name": "tableName",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "The name of the table"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of columns with metadata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "column_name": { "type": "string" },
+                      "data_type": { "type": "string" },
+                      "is_nullable": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/tables/{tableName}/relations": {
+      "get": {
+        "summary": "Get relations for a table",
+        "parameters": [
+          {
+            "name": "tableName",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "The name of the table"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Relations for the table",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "local_column": { "type": "string" },
+                      "foreign_table": { "type": "string" },
+                      "foreign_column": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/data/{tableName}": {
+      "get": {
+        "summary": "Get enriched data from a table",
+        "parameters": [
+          {
+            "name": "tableName",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "The name of the table"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "default": 100 },
+            "description": "Maximum number of records to return"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "default": 0 },
+            "description": "Number of records to skip"
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string" },
+            "description": "Column to sort by"
+          },
+          {
+            "name": "sortOrder",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["ASC", "DESC"],
+              "default": "ASC"
+            },
+            "description": "Sort order (ASC or DESC)"
+          },
+          {
+            "name": "filters",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string" },
+            "description": "JSON object for filtering results, e.g., {\"column1\":\"value1\",\"column2\":\"value2\"}"
+          },
+          {
+            "name": "includeRelations",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "boolean", "default": false },
+            "description": "Include data from related tables"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Enriched data from the table",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
